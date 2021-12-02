@@ -27,3 +27,7 @@ hs_err_pid*
 /.idea/Pac-Man.iml
 /.idea/runConfigurations.xml
 /.idea/vcs.xml
+*.project
+*.classpath
+/bin
+/.settings
