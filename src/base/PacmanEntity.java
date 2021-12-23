@@ -13,6 +13,7 @@ public class PacmanEntity {
     protected BufferedImage icon;
     public Position position;
     public String direction;
+    public Position previousPosition;
 
     public void draw(Graphics g, int x, int y) {
         g.drawImage(icon, x, y, null);
@@ -20,4 +21,5 @@ public class PacmanEntity {
     public void move(int dx, int dy) {
         position.translate(dx, dy);
     }
+
 }

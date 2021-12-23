@@ -16,10 +16,32 @@ public class PacmanModel extends PacmanEntity {
     public PacmanModel(String pathToIcon, Position position) throws IOException {
         icon = ImageIO.read(new File(pathToIcon));
         this.position = position;
+        previousPosition = position;
     }
 
     public void draw(Graphics g, int x, int y, String direction) {
         this.direction = direction;
         super.draw(g, x, y);
+    }
+
+    public void update(boolean[][] board, String direction) {
+        previousPosition = position;
+        Position currentPosition = position;
+        switch (direction) {
+            case "left":
+                currentPosition.translate(-1, 0);
+                break;
+            case "right":
+                currentPosition.translate(1, 0);
+                break;
+            case "up":
+                currentPosition.translate(0, -1);
+                break;
+            case "down":
+                currentPosition.translate(0, 1);
+                break;
+        }
+        if (!board[currentPosition.getX()][currentPosition.getY()])
+            position = currentPosition;
     }
 }

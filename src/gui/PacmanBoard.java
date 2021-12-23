@@ -19,6 +19,7 @@ import java.util.ArrayList;
  */
 public class PacmanBoard extends JComponent {
     boolean[][] board;
+    boolean[][] coins;
     int cellSize = 20;
     PacmanKeyListener kl;
     Position size;
@@ -28,6 +29,7 @@ public class PacmanBoard extends JComponent {
     public PacmanBoard(int width, int height, PacmanKeyListener kl) {
         size = new Position(width, height);
         board = new boolean[width / cellSize][height / cellSize];
+        coins = new boolean[width / cellSize][height / cellSize];
         this.kl = kl;
         initEntities();
         startGameTimer();
@@ -88,73 +90,65 @@ public class PacmanBoard extends JComponent {
         updatePacman();
         //Ghosts' logic
         updateGhosts();
+
+        checkCollisions();
+    }
+
+    private void checkCollisions() {
+        Position pacmanPos = entities.get(0).position;
+        Position cg = entities.get(1).previousPosition;
+        Position sg = entities.get(2).previousPosition;
+        for (int x = 0; x < coins.length; x++)
+            for (int y = 0; y < coins[0].length; y++)
+                if (coins[x][y] && Position.equals(entities.get(0).position, new Position(x,y))) {
+                    coins[x][y] = false;
+                    //TODO прибавление счёта
+                }
+        String pacmanDir = entities.get(0).direction;
+        if (cg.getX() == pacmanPos.getX() - 1 && cg.getY() == pacmanPos.getY() ||
+                sg.getX() == pacmanPos.getX() - 1 && sg.getY() == pacmanPos.getY())
+            if (pacmanDir == "right") {
+                //TODO прибавление счёта
+            } else {
+                //TODO смэрть
+            }
+        if (cg.getX() == pacmanPos.getX() + 1 && cg.getY() == pacmanPos.getY() ||
+                sg.getX() == pacmanPos.getX() + 1 && sg.getY() == pacmanPos.getY())
+            if (pacmanDir == "left") {
+                //TODO прибавление счёта
+            } else {
+                //TODO смэрть
+            }
+        if (cg.getX() == pacmanPos.getX() && cg.getY() == pacmanPos.getY() - 1||
+                sg.getX() == pacmanPos.getX() && sg.getY() == pacmanPos.getY() - 1)
+            if (pacmanDir == "up") {
+                //TODO прибавление счёта
+            } else {
+                //TODO смэрть
+            }
+        if (cg.getX() == pacmanPos.getX() && cg.getY() == pacmanPos.getY() + 1 ||
+                sg.getX() == pacmanPos.getX() && sg.getY() == pacmanPos.getY() + 1)
+            if (pacmanDir == "down") {
+                //TODO прибавление счёта
+            } else {
+                //TODO смэрть
+            }
+
+
     }
 
     private void updateGhosts() {
         CleverGhost cg = (CleverGhost) entities.get(1);
         StupidGhost sg = (StupidGhost) entities.get(2);
-        boolean canMoveInPrevDirection = false;
-        do {
-            switch (sg.direction) {
-                case "left":
-                    if (!board[sg.position.getX() - 1][sg.position.getY()]) {
-                        canMoveInPrevDirection = true;
-                        sg.move(-1, 0);
-                    }
-                    break;
-                case "right":
-                    if (!board[sg.position.getX() + 1][sg.position.getY()]) {
-                        canMoveInPrevDirection = true;
-                        sg.move(1, 0);
-                    }
-                    break;
-                case "up":
-                    if (!board[sg.position.getX()][sg.position.getY() - 1]) {
-                        canMoveInPrevDirection = true;
-                        sg.move(0, -1);
-                    }
-                    break;
-                case "down":
-                    if (!board[sg.position.getX()][sg.position.getY() + 1]) {
-                        canMoveInPrevDirection = true;
-                        sg.move(0, 1);
-                    }
-                    break;
-            }
-            if (!canMoveInPrevDirection) {
-                ArrayList<String> availableDirections = new ArrayList<>();
-                if (!board[sg.position.getX() - 1][sg.position.getY()])
-                    availableDirections.add("left");
-                if (!board[sg.position.getX() + 1][sg.position.getY()])
-                    availableDirections.add("right");
-                if (!board[sg.position.getX()][sg.position.getY() - 1])
-                    availableDirections.add("up");
-                if (!board[sg.position.getX()][sg.position.getY() + 1])
-                    availableDirections.add("down");
-                int rnd = (int) Math.floor(Math.random() * (availableDirections.size() - 1));
-                sg.direction = availableDirections.get(rnd);
-            }
-        } while (!canMoveInPrevDirection);
+        //Stupid ghost logic
+        sg.update(board);
+
+        //Clever ghost logic
+        cg.update(board, entities.get(0).position);
     }
 
     private void updatePacman() {
         String direction = kl.getDirection();
-        Position currentPosition = entities.get(0).position;
-        switch (direction) {
-            case "left":
-                currentPosition.translate(-1, 0);
-                break;
-            case "right":
-                currentPosition.translate(1, 0);
-                break;
-            case "up":
-                currentPosition.translate(0, -1);
-                break;
-            case "down":
-                currentPosition.translate(0, 1);
-                break;
-        }
-        if (!board[currentPosition.getX()][currentPosition.getY()])
-            entities.get(0).position = currentPosition;
+        ((PacmanModel)entities.get(0)).update(board, direction);
     }
 }
