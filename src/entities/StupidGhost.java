@@ -1,6 +1,6 @@
 package entities;
 
-import base.GhostEntity;
+import base.PacmanEntity;
 import util.Position;
 
 import javax.imageio.ImageIO;
@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class StupidGhost extends GhostEntity {
+public class StupidGhost extends PacmanEntity {
     public StupidGhost(String pathToIcon, Position position) throws IOException {
         icon = ImageIO.read(new File(pathToIcon));
         this.position = position;
