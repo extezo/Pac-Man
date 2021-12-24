@@ -29,4 +29,8 @@ public class Position {
         return p1.x == p2.x && p1.y == p2.y;
     }
 
+    public Position clone() {
+        return new Position(x, y);
+    }
+
 }

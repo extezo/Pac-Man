@@ -6,12 +6,14 @@ import util.Position;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class CleverGhost extends GhostEntity {
     public CleverGhost(String pathToIcon, Position position) throws IOException {
         icon = ImageIO.read(new File(pathToIcon));
+        this.direction = "up";
         this.position = position;
-        switch ((int)Math.floor(Math.random() * 3)) {
+        switch ((int) Math.floor(Math.random() * 3)) {
             case 0:
                 direction = "left";
                 break;
@@ -28,27 +30,35 @@ public class CleverGhost extends GhostEntity {
     }
 
     public void update(boolean[][] board, Position pacmanPos) {
-        previousPosition = position;
+        previousPosition = position.clone();
         findDirToPacman(pacmanPos, board);
+
         switch (direction) {
             case "left":
                 move(-1, 0);
+                break;
             case "right":
                 move(1, 0);
+                break;
             case "up":
                 move(0, -1);
+                break;
             case "down":
                 move(0, 1);
+                break;
         }
     }
 
     public void findDirToPacman(Position pacmanPos, boolean[][] walls) {
         int[][] routes = new int[walls.length][walls[0].length];
-        routes[position.getX()][position.getY()] = 0;
+
         for (int i = 0; i < walls.length; i++)
             for (int j = 0; j < walls[0].length; j++)
-                routes[i][j] = -1;
-        calcRoutes(routes, position.getX(), position.getY(), 0);
+                if (walls[i][j])
+                    routes[i][j] = -1;
+                else routes[i][j] = -2;
+        routes[position.getX()][position.getY()] = 0;
+        calcRoutes(routes, pacmanPos);
         Position nextPos = findNextStep(routes, pacmanPos.getX(), pacmanPos.getY());
         if (nextPos.getX() < position.getX())
             direction = "left";
@@ -66,19 +76,19 @@ public class CleverGhost extends GhostEntity {
         Position result = new Position(x, y);
         do {
             result = new Position(x, y);
-            if (routes[x][y]-routes[x-1][y] == 1) {
+            if (x != 0 && routes[x][y] - routes[x - 1][y] == 1) {
                 x--;
                 continue;
             }
-            if (routes[x][y]-routes[x+1][y] == 1) {
+            if (x != routes.length - 1 && routes[x][y] - routes[x + 1][y] == 1) {
                 x++;
                 continue;
             }
-            if (routes[x][y]-routes[x][y-1] == 1) {
+            if (y != 0 && routes[x][y] - routes[x][y - 1] == 1) {
                 y--;
                 continue;
             }
-            if (routes[x][y]-routes[x][y+1] == 1) {
+            if (y != routes[0].length - 1 && routes[x][y] - routes[x][y + 1] == 1) {
                 y++;
                 continue;
             }
@@ -86,13 +96,34 @@ public class CleverGhost extends GhostEntity {
         return result;
     }
 
-    private void calcRoutes(int[][] routes, int x, int y, int dist) {
-        if (routes[x][y] != 1 || x >= routes.length || x < 0 || y >= routes[0].length || y < 0)
-            return;
-        routes[x][y] = dist+1;
-        calcRoutes(routes, x-1, y, dist+1);
-        calcRoutes(routes, x+1, y, dist+1);
-        calcRoutes(routes, x, y-1, dist+1);
-        calcRoutes(routes, x, y+1, dist+1);
+    private void calcRoutes(int[][] routes, Position finish) {
+        int d = 0;
+        do {
+            for (int x = 0; x < routes.length; x++) {
+                for (int y = 0; y < routes[0].length; y++) {
+                    if (routes[x][y] == d) {
+                        if (x > 0 && routes[x - 1][y] == -2)
+                            routes[x - 1][y] = d + 1;
+                        if(x<routes.length-1&& routes[x + 1][y] == -2)
+                            routes[x + 1][y] = d + 1;
+                        if(y>0&& routes[x][y - 1] == -2)
+                            routes[x][y - 1] = d + 1;
+                        if(y<routes[0].length-1&&  routes[x][y + 1] == -2)
+                            routes[x][y + 1] = d + 1;
+
+                    }
+                }
+            }
+            boolean done = true;
+            for (int x = 0; x < routes.length; x++)
+                for (int y = 0; y < routes[0].length; y++)
+                    if (routes[x][y] < 0)
+                        done = false;
+            if (done) return;
+            d++;
+            /*System.out.println();
+            for (int x = 0; x < routes.length; x++)
+                System.out.println(Arrays.toString(routes[x]));*/
+        } while (routes[finish.getX()][finish.getY()] == -2);
     }
 }

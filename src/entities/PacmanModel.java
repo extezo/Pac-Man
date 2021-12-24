@@ -19,14 +19,14 @@ public class PacmanModel extends PacmanEntity {
         previousPosition = position;
     }
 
-    public void draw(Graphics g, int x, int y, String direction) {
+    public void draw(Graphics g, int size, String direction) {
         this.direction = direction;
-        super.draw(g, x, y);
+        super.draw(g, size);
     }
 
     public void update(boolean[][] board, String direction) {
         previousPosition = position;
-        Position currentPosition = position;
+        Position currentPosition = position.clone();
         switch (direction) {
             case "left":
                 currentPosition.translate(-1, 0);
@@ -41,6 +41,7 @@ public class PacmanModel extends PacmanEntity {
                 currentPosition.translate(0, 1);
                 break;
         }
+
         if (!board[currentPosition.getX()][currentPosition.getY()])
             position = currentPosition;
     }
